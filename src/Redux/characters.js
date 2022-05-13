@@ -1,68 +1,85 @@
-export const GET_CHARACTERS = "get/CHARACTERS";
+export const MOVIE_TITLE = "get/MOVIE_TITLE";
+export const MOVIES_DETAILS = "get/MOVIES_DETAILS";
 
-const URL = "https://api.spacexdata.com/v3/missions";
+// const URL = "https://swapi.dev/api/people/?page=2";
+const URL = "https://swapi.dev/api/films/";
 
-export const getCharacter = (id) => ({
-    type: GET_CHARACTERS,
-    payload: id,
+export const moviesTitles = (id) => ({
+  type: MOVIE_TITLE,
+  payload: id,
 });
 
+export const moviesDetails = (id) => ({
+  type: MOVIES_DETAILS,
+  payload: id,
+});
 
-export const fetchAllCharacter = async() => {
-    const response = await fetch(URL);
-    return response.json();
+export const getMoviesTitle = () => async (dispatch) => {
+  const response = await fetch(URL);
+  const results = await response.json();
+  const objList = results.results;
+  const moviesArr = [];
+  objList.forEach((item) => {
+    const moviesTitle = {
+      title: item.title,
+    };
+    moviesArr.push(moviesTitle);
+  });
+  dispatch(moviesTitles(moviesArr));
 };
+getMoviesTitle();
 
-export const getCharacters = () => async(dispatch) => {
-    const response = await fetch(URL);
-    const data = await response.json();
-    const missionArr = [];
-    data.forEach((m) => {
-        const mission = {
-            mission_id: m.mission_id,
-            mission_name: m.mission_name,
-            mission_description: m.description,
-        };
-        missionArr.push(mission);
+export const getMoviesDetails = () => async (dispatch) => {
+  const moviesDetailArr = [];
+  const response = await fetch(URL);
+  const results = await response.json();
+  const objList = results.results;
+  objList.forEach((i) => {
+    // console.log(i.title);
+    const filmList = i.characters;
+    const filmArr = [];
+    filmList.forEach((x) => {
+      filmArr.push(x);
     });
-    dispatch(loadMission(missionArr));
-};
-
-// export default getMissions;
-
-export const missionsSelector = (state) => state.missions;
-
-export const newStateToJoinMission = (missions, id) => {
-    const newState = missions.map((mission) => {
-        if (mission.mission_id !== id) {
-            return mission;
-        }
-        return {...mission, isReserved: true };
+    filmArr.forEach((a) => {
+      fetch(a)
+        .then((res) => res.json())
+        .then((k) => {
+          const moviesDetail = {
+            name: k.name,
+            gender: k.gender,
+            height: k.height,
+          };
+          console.log(moviesDetail);
+          moviesDetailArr.push(moviesDetail);
+        });
     });
-    return newState;
+  });
+  // const moviesDetailArr = [];
+  // objList.forEach((item) => {
+  //     const moviesDetail = {
+  //         name: item.name,
+  //         gender: item.gender,
+  //         height: item.height,
+  //     };
+  //     moviesDetailArr.push(moviesDetail);
+  // });
+  dispatch(moviesDetails(moviesDetailArr));
 };
-export const newStateToLeaveMission = (missions, id) => {
-    const newState = missions.map((mission) => {
-        if (mission.mission_id !== id) {
-            return mission;
-        }
-        return {...mission, isReserved: false };
-    });
-    return newState;
-};
+getMoviesDetails();
+//
 
 const initialState = [];
 
-const missionReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case LOAD_MISSION:
-            return [...state, ...action.payload];
-        case JOIN_MISSION:
-            return newStateToJoinMission(state, action.payload);
-        case LEAVE_MISSION:
-            return newStateToLeaveMission(state, action.payload);
-        default:
-            return state;
-    }
+const characterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case MOVIE_TITLE:
+      return [...state, ...action.payload];
+    case MOVIES_DETAILS:
+      return [...state, ...action.payload];
+    default:
+      return state;
+  }
 };
-export default missionReducer;
+
+export default characterReducer;

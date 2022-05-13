@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
+import { v4 as uuidv4 } from "uuid";
 import starWarsLogo from "../images/starWarsLogo.png";
-
-// const bg = require(`../images/StarWarsLogo.png`).default;
+import { getMoviesTitle } from "../Redux/characters";
 
 const Container = styled("div")`
   height: 100%;
@@ -66,9 +67,21 @@ const ListItem = styled("li")`
   margin-bottom: 0.8em;
 `;
 
-const options = ["Mangoes", "Apples", "Oranges"];
-
+// const options = ["Mangoes", "Apples", "Oranges"];
+const selectCharacters = (state) => state.characters;
 const Home = () => {
+  const selectedCharacter = useSelector(selectCharacters);
+  console.log(selectedCharacter);
+  const dispatch = useDispatch();
+  const getCharactersData = () => {
+    if (selectedCharacter.length === 0) {
+      dispatch(getMoviesTitle());
+    }
+  };
+  useEffect(() => {
+    getCharactersData();
+  }, []);
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -93,13 +106,10 @@ const Home = () => {
               <DropDownListContainer>
                 <DropDownList>
                   {" "}
-                  {options.map((option) => (
-                    <ListItem
-                      onClick={onOptionClicked(option)}
-                      key={Math.random()}
-                    >
+                  {selectedCharacter.map((char) => (
+                    <ListItem onClick={onOptionClicked(char)} key={uuidv4()}>
                       {" "}
-                      {option}{" "}
+                      {char.title}{" "}
                     </ListItem>
                   ))}{" "}
                 </DropDownList>{" "}
